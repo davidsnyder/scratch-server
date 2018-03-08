@@ -20,7 +20,7 @@ Content-length: {len(HTML_BODY)}
 {HTML_BODY}""".encode('ASCII')
 
 with socket.socket() as server_sock:
-    #SO_REUSEADDR reuses sockets in a TIME_WAIT state, without waiting for the timeout to expire    
+	#SO_REUSEADDR reuses sockets in a TIME_WAIT state, without waiting for the timeout to expire
 	server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 	server_sock.bind((HOST,PORT))
 	server_sock.listen(1)
