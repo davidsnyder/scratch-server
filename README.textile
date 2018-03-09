@@ -1,1 +1,37 @@
 Working through https://defn.io/2018/02/25/web-app-from-scratch-01/
+
+python3 server.py 
+curl -v 127.0.0.1:9000
+
+nc -l 9000
+nc 127.0.0.1 9000
+
+open two terminal windows and send data using netcat
+use netcat to send files back and forth:
+ Start by using nc to listen on a specific port, with output captured into a file:
+           $ nc -l 1234 > filename.out
+     Using a second machine, connect to the listening nc process, feeding it the file which is to be trans-
+     ferred:
+           $ nc host.example.com 1234 < filename.in
+
+listen on a port using netcat and make a GET request in the browser, watch the request appear in the terminal
+manually send back an HTML response, watch it appear in the browser
+
+HTTP/1.1 200 OK
+Content-type: text/html
+Content-length: 5
+
+Hello
+
+(can also send HTML tags, obviously)
+nc google.com 80, send garbage and see the headers for the 400 Bad Request
+nc google.com 80, make a head request "HEAD / HTTP/1.0" or GET request. You can manually make requests just like a browser would
+ $ echo -n "GET / HTTP/1.0\r\n\r\n" | nc host.example.com 80
+use ping to resolve the DNS of a website and get the IP address
+ $ ping google.com
+ build an email server from hand (port 25 for SMTP vs 80 for HTTP)
+
+ nc -u -z hostname.com 1-100 (make a UDP connection to ports 1-100 on the server, will always succeed, but will show you the protocols)
+
+ port vs. socket (socket = IP address + port)
+
