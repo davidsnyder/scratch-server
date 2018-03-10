@@ -24,9 +24,12 @@ Content-length: 5
 Hello
 
 (can also send HTML tags, obviously)
+
 nc google.com 80, send garbage and see the headers for the 400 Bad Request
 nc google.com 80, make a head request "HEAD / HTTP/1.0" or GET request. You can manually make requests just like a browser would
  $ echo -n "GET / HTTP/1.0\r\n\r\n" | nc host.example.com 80
+If you get a 403 Forbidden, pass the Host in as part of the headers, eg: "Host: apple.com"
+
 use ping to resolve the DNS of a website and get the IP address
  $ ping google.com
  build an email server from hand (port 25 for SMTP vs 80 for HTTP)
@@ -34,4 +37,7 @@ use ping to resolve the DNS of a website and get the IP address
  nc -u -z hostname.com 1-100 (make a UDP connection to ports 1-100 on the server, will always succeed, but will show you the protocols)
 
  port vs. socket (socket = IP address + port)
+
+
+ build a server from scratch, from always sending 200, to 404 and 400, to actually serving files
 
