@@ -40,4 +40,6 @@ use ping to resolve the DNS of a website and get the IP address
 
 
  build a server from scratch, from always sending 200, to 404 and 400, to actually serving files
+ then be able to accept other requests: HEAD, POST
+ connecting to a database and saving/retrieving records
 
