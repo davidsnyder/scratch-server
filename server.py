@@ -5,45 +5,44 @@ HOST = "127.0.0.1"
 PORT = 9000
 SERVER_ROOT = os.path.abspath("www")
 
-HTML_BODY_200 = "<h1>Hello!</h1>"
-HTML_BODY_400 = "Bad Request"
-HTML_BODY_404 = "Not Found"
-HTML_BODY_405 = "Method Not Allowed"
-
 FILE_HEADERS = """\
-HTTP/1.1 200 OK
+HTTP/1.1 {response_code} {response_type}
 Content-type: {content_type}
 Content-length: {content_length}
 
 """
 
-OK_RESPONSE = f"""\
-HTTP/1.1 200 OK
-Content-type: text/html
-Content-length: {len(HTML_BODY_200)}
+OK_RESPONSE_BODY = "OK"
+OK_RESPONSE = FILE_HEADERS.format(
+	response_code=200,
+	response_type=OK_RESPONSE_BODY,
+	content_type="text/html",
+	content_length=len(OK_RESPONSE_BODY)
+	) + OK_RESPONSE_BODY
 
-{HTML_BODY_200}""".encode('ASCII')
+BAD_REQUEST_RESPONSE_BODY = "Bad Request"
+BAD_REQUEST_RESPONSE = FILE_HEADERS.format(
+	response_code=400,
+	response_type=BAD_REQUEST_RESPONSE_BODY,
+	content_type="text/html",
+	content_length=len(BAD_REQUEST_RESPONSE_BODY)
+	) + BAD_REQUEST_RESPONSE_BODY
 
-BAD_REQUEST_RESPONSE = f"""\
-HTTP/1.1 400 Bad Request
-Content-type: text/plain
-Content-length: {len(HTML_BODY_400)}
+NOT_FOUND_RESPONSE_BODY = "Not Found"
+NOT_FOUND_RESPONSE = FILE_HEADERS.format(
+	response_code=404,
+	response_type=NOT_FOUND_RESPONSE_BODY,
+	content_type="text/html",
+	content_length=len(NOT_FOUND_RESPONSE_BODY)
+	) + NOT_FOUND_RESPONSE_BODY
 
-{HTML_BODY_400}""".encode('ASCII')
-
-NOT_FOUND_RESPONSE = f"""\
-HTTP/1.1 404 Not Found
-Content-type: text/plain
-Content-length: {len(HTML_BODY_404)}
-
-{HTML_BODY_404}""".encode('ASCII')
-
-METHOD_NOT_ALLOWED_RESPONSE = f"""\
-HTTP/1.1 405 Method Not Allowed
-Content-type: text/plain
-Content-length: {len(HTML_BODY_405)}
-
-{HTML_BODY_405}""".encode('ASCII')
+METHOD_NOT_ALLOWED_RESPONSE_BODY = "Method Not Allowed"
+METHOD_NOT_ALLOWED_RESPONSE = FILE_HEADERS.format(
+	response_code=405,
+	response_type=METHOD_NOT_ALLOWED_RESPONSE_BODY,
+	content_type="text/html",
+	content_length=len(METHOD_NOT_ALLOWED_RESPONSE_BODY)
+	) + METHOD_NOT_ALLOWED_RESPONSE_BODY
 
 with socket.socket() as server_sock:
 	#SO_REUSEADDR reuses sockets in a TIME_WAIT state, without waiting for the timeout to expire
@@ -57,6 +56,7 @@ with socket.socket() as server_sock:
 		data = client_sock.recv(1024)
 		if not data:
 			print("Empty request")
+			client_sock.sendall(BAD_REQUEST_RESPONSE)
 		else:
 			try:
 				lines = data.decode('ASCII').split("\r\n")
@@ -81,7 +81,12 @@ with socket.socket() as server_sock:
 
 					if os.path.isfile(filename):
 						file = open(filename, 'rb')
-						response_headers = FILE_HEADERS.format(content_type="text/html", content_length=os.path.getsize(filename)).encode('ASCII')
+						response_headers = FILE_HEADERS.format(
+							response_code=200,
+							response_type="OK",
+							content_type="text/html",
+							content_length=os.path.getsize(filename)
+							).encode('ASCII')
 						client_sock.sendall(response_headers)
 						client_sock.sendfile(file)
 					else:
