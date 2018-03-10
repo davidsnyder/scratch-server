@@ -12,14 +12,6 @@ Content-length: {content_length}
 
 """
 
-OK_RESPONSE_BODY = "OK"
-OK_RESPONSE = FILE_HEADERS.format(
-	response_code=200,
-	response_type=OK_RESPONSE_BODY,
-	content_type="text/html",
-	content_length=len(OK_RESPONSE_BODY)
-	) + OK_RESPONSE_BODY
-
 BAD_REQUEST_RESPONSE_BODY = "Bad Request"
 BAD_REQUEST_RESPONSE = FILE_HEADERS.format(
 	response_code=400,
