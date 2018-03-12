@@ -43,6 +43,30 @@ use ping to resolve the DNS of a website and get the IP address
  GET parameters
  then be able to accept other requests: HEAD, POST
  connecting to a database and saving/retrieving records
+ start with a flat file (tsv,csv) database and move to sqlite
+ how to write SQL
  How can we style our pages using HTML/CSS/Javascript?
  What else can we do with sockets?
+
+
+
+GET forms and POST forms
+save a POST form and change the method type to "GET", see the parameters being passed explicitly
+browsers/servers use cookies on the client to handle state
+HTTP vs HTTPS
+
+grab the form data from a website (using inspect) and try to login by dumping the headers (with the cookies) and passing them in manually
+curl -v -d "authenticity_token=LTQfQB6MSU8LbRxfbHLrXqBy0py2Pv07dezrk6YRj58%3D&person%5Bemail_address%5D=dsnyder90%40gmail.com" --dump-headers headers 750words.com/auth/signin
+curl -L -v -b headers 750words.com > 750words_logged_in.html ; open 750words_logged_in.html
+
+What is an API?
+echo '{"text": "Hello **world**!"}' | curl -d @- https://api.github.com/markdown
+
+What is REST?
+
+
+What is a blockchain? 
+Can we make a cryptocurrency?
+do the checksum work by hand
+
 
