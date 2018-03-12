@@ -5,7 +5,7 @@ HOST = "127.0.0.1"
 PORT = 9000
 SERVER_ROOT = os.path.abspath("www")
 
-FILE_HEADERS = """\
+HTTP_HEADERS = """\
 HTTP/1.1 {response_code} {response_type}
 Content-type: {content_type}
 Content-length: {content_length}
@@ -13,15 +13,15 @@ Content-length: {content_length}
 """
 
 BAD_REQUEST_RESPONSE_BODY = "Bad Request"
-BAD_REQUEST_RESPONSE = FILE_HEADERS.format(
+BAD_REQUEST_RESPONSE = HTTP_HEADERS.format(
 	response_code=400,
 	response_type=BAD_REQUEST_RESPONSE_BODY,
-	content_type="text/html",
+	content_type="text/plain",
 	content_length=len(BAD_REQUEST_RESPONSE_BODY)
 	) + BAD_REQUEST_RESPONSE_BODY
 
 NOT_FOUND_RESPONSE_BODY = "Not Found"
-NOT_FOUND_RESPONSE = FILE_HEADERS.format(
+NOT_FOUND_RESPONSE = HTTP_HEADERS.format(
 	response_code=404,
 	response_type=NOT_FOUND_RESPONSE_BODY,
 	content_type="text/html",
@@ -29,10 +29,10 @@ NOT_FOUND_RESPONSE = FILE_HEADERS.format(
 	) + NOT_FOUND_RESPONSE_BODY
 
 METHOD_NOT_ALLOWED_RESPONSE_BODY = "Method Not Allowed"
-METHOD_NOT_ALLOWED_RESPONSE = FILE_HEADERS.format(
+METHOD_NOT_ALLOWED_RESPONSE = HTTP_HEADERS.format(
 	response_code=405,
 	response_type=METHOD_NOT_ALLOWED_RESPONSE_BODY,
-	content_type="text/html",
+	content_type="text/plain",
 	content_length=len(METHOD_NOT_ALLOWED_RESPONSE_BODY)
 	) + METHOD_NOT_ALLOWED_RESPONSE_BODY
 
@@ -73,7 +73,7 @@ with socket.socket() as server_sock:
 
 					if os.path.isfile(filename):
 						file = open(filename, 'rb')
-						response_headers = FILE_HEADERS.format(
+						response_headers = HTTP_HEADERS.format(
 							response_code=200,
 							response_type="OK",
 							content_type="text/html",
