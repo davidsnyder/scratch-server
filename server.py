@@ -64,7 +64,7 @@ with socket.socket() as server_sock:
 				request = {"method": method, "path": path, "headers": headers}
 				print(request)
 				if request['method'] != "GET":
-					client_sock.sendall(METHOD_NOT_ALLOWED_RESPONSE)
+					client_sock.sendall(METHOD_NOT_ALLOWED_RESPONSE.encode('ASCII'))
 				else:
 					path = request['path']
 					if path == "/":
@@ -82,8 +82,8 @@ with socket.socket() as server_sock:
 						client_sock.sendall(response_headers)
 						client_sock.sendfile(file)
 					else:
-						client_sock.sendall(NOT_FOUND_RESPONSE)
+						client_sock.sendall(NOT_FOUND_RESPONSE.encode('ASCII'))
 					client_sock.close()
 			except Exception as e:
 				print(f'Failed to parse request: {e}')
-				client_sock.sendall(BAD_REQUEST_RESPONSE)
+				client_sock.sendall(BAD_REQUEST_RESPONSE.encode('ASCII'))

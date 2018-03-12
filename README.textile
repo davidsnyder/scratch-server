@@ -1,7 +1,7 @@
 Working through https://defn.io/2018/02/25/web-app-from-scratch-01/
 
 python3 server.py 
-curl -v 127.0.0.1:9000
+curl -X GET -v 127.0.0.1:9000
 
 nc -l 9000
 nc 127.0.0.1 9000
