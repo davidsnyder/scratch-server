@@ -6,6 +6,12 @@ HOST = "127.0.0.1"
 PORT = 9000
 SERVER_ROOT = os.path.abspath("www")
 
+FAVORITE_FOOD_DATABASE = {
+		"Jim Bob" : "ice cream",
+		"Slim Bob" : "hamburgers",
+		"Mary Smith" : "sushi"
+}
+
 HTTP_HEADERS = """\
 HTTP/1.1 {response_code} {response_type}
 Content-type: {content_type}
@@ -87,9 +93,12 @@ with socket.socket() as server_sock:
 							search_html = file.read()
 							first_name = request["query_parameters"]["first_name"] if "first_name" in request["query_parameters"] else ""
 							last_name = request["query_parameters"]["last_name"] if "last_name" in request["query_parameters"] else ""
+							lookup_key = " ".join([first_name, last_name])
+							favorite_food = FAVORITE_FOOD_DATABASE[lookup_key] if lookup_key in FAVORITE_FOOD_DATABASE else "unknown"
 							templated_search_html = search_html.decode('utf-8').format(
 								first_name=first_name,
-								last_name=last_name
+								last_name=last_name,
+								favorite_food=favorite_food
 								)
 							response_headers = HTTP_HEADERS.format(
 								response_code=200,
