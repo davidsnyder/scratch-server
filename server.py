@@ -2,6 +2,7 @@ import socket
 import os
 from urllib.parse import unquote_plus
 
+DEBUG = True
 HOST = "127.0.0.1"
 PORT = 9000
 SERVER_ROOT = os.path.abspath("www")
@@ -43,6 +44,26 @@ METHOD_NOT_ALLOWED_RESPONSE = HTTP_HEADERS.format(
 	content_length=len(METHOD_NOT_ALLOWED_RESPONSE_BODY)
 	) + METHOD_NOT_ALLOWED_RESPONSE_BODY
 
+def parse_request(socket_data):
+	"""Generate a request dictionary from the raw socket_data"""
+	lines = socket_data.decode('ASCII').split("\r\n")
+	request = {"headers": {}, "method": None, "path": None, "query_parameters": {}}
+	for index, line in enumerate(lines):
+		if not line:
+			break
+		elif index == 0: #request method, path, query_parameters
+			method, path, _ = line.split(" ")
+			path, _, query_parameters = path.partition("?")
+			request["method"] = method
+			request["path"] = path
+			if query_parameters:
+				query_parameters = unquote_plus(query_parameters)
+				request["query_parameters"] = dict([p.split("=") for p in query_parameters.split("&")])
+		else: #headers
+			name, _, value = line.partition(":")
+			request["headers"][name.lower()] = value.lstrip()
+	return request
+
 with socket.socket() as server_sock:
 	#SO_REUSEADDR reuses sockets in a TIME_WAIT state, without waiting for the timeout to expire
 	server_sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -51,34 +72,17 @@ with socket.socket() as server_sock:
 	print(f"Listening on {HOST}:{PORT}...")
 	while True: #SERVER LOOP
 		client_sock, client_addr = server_sock.accept()
-		print(f"Accepted connection from {client_addr}")
+		if DEBUG:
+			print(f"Accepted connection from {client_addr}")
 		data = client_sock.recv(1024)
 		if not data:
 			print("Empty request")
 			client_sock.sendall(BAD_REQUEST_RESPONSE)
 		else:
 			try:
-				#PARSE REQUEST
-				lines = data.decode('ASCII').split("\r\n")
-				request = {"headers": {}}
-				for index, line in enumerate(lines):
-					if not line:
-						break
-					elif index == 0: #request method, path, query_parameters
-						method, path, _ = line.split(" ")
-						request["method"] = method
-						path, _, query_parameters = path.partition("?")
-						request["path"] = path						
-						request["query_parameters"] = {}
-						if query_parameters:
-							query_parameters = unquote_plus(query_parameters)
-							request["query_parameters"] = dict([p.split("=") for p in query_parameters.split("&")])
-					else: #headers
-						name, _, value = line.partition(":")
-						request["headers"][name.lower()] = value.lstrip()
-				print(request)
-				#END PARSE REQUEST
-
+				request = parse_request(data)
+				if DEBUG:
+					print(request)
 				#HANDLE REQUEST
 				if request['method'] not in ["GET","POST"]:
 					client_sock.sendall(METHOD_NOT_ALLOWED_RESPONSE.encode('ASCII'))
