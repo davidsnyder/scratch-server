@@ -1,5 +1,6 @@
 import socket
 import os
+from urllib.parse import unquote_plus
 
 HOST = "127.0.0.1"
 PORT = 9000
@@ -52,16 +53,25 @@ with socket.socket() as server_sock:
 		else:
 			try:
 				lines = data.decode('ASCII').split("\r\n")
-				headers = {}
+				request = {"headers": {}}
 				for index, line in enumerate(lines):
 					if not line:
 						break
 					elif index == 0: #request method
 						method, path, _ = line.split(" ")
+						request["method"] = method
+						path, _, query_parameters = path.partition("?")
+						request["path"] = path						
+
+						if query_parameters:
+							query_parameters = unquote_plus(query_parameters)
+							request["query_parameters"] = dict([p.split("=") for p in query_parameters.split("&")])
+						else:
+							request["query_parameters"] = {}
 					else:
 						name, _, value = line.partition(":")
-						headers[name.lower()] = value.lstrip()
-				request = {"method": method, "path": path, "headers": headers}
+						request["headers"][name.lower()] = value.lstrip()
+
 				print(request)
 				if request['method'] != "GET":
 					client_sock.sendall(METHOD_NOT_ALLOWED_RESPONSE.encode('ASCII'))

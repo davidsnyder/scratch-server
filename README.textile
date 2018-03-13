@@ -55,6 +55,13 @@ save a POST form and change the method type to "GET", see the parameters being p
 browsers/servers use cookies on the client to handle state
 HTTP vs HTTPS
 
+
+Why do we need parameters? When are hyperlinks not enough? (REST tries to map resources more explicitly using hyperlinks)
+Start with using GET with forms
+Simple search box, grab some data from a hash table in memory (using GET requests), then move to flat files, then to SQLite
+
+eventually you need a separation of concerns (M-V-C)
+
 grab the form data from a website (using inspect) and try to login by dumping the headers (with the cookies) and passing them in manually
 curl -v -d "authenticity_token=LTQfQB6MSU8LbRxfbHLrXqBy0py2Pv07dezrk6YRj58%3D&person%5Bemail_address%5D=dsnyder90%40gmail.com" --dump-headers headers 750words.com/auth/signin
 curl -L -v -b headers 750words.com > 750words_logged_in.html ; open 750words_logged_in.html
