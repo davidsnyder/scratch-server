@@ -47,11 +47,9 @@ METHOD_NOT_ALLOWED_RESPONSE = HTTP_HEADERS.format(
 def parse_request(socket_data):
 	"""Generate a request dictionary from the raw socket_data"""
 	lines = socket_data.decode('ASCII').split("\r\n")
-	request = {"headers": {}, "method": None, "path": None, "query_parameters": {}}
+	request = {"headers": {}, "method": None, "path": None, "query_parameters": {}, "form": {}}
 	for index, line in enumerate(lines):
-		if not line:
-			break
-		elif index == 0: #request method, path, query_parameters
+		if index == 0: #request method, path, query_parameters
 			method, path, _ = line.split(" ")
 			path, _, query_parameters = path.partition("?")
 			request["method"] = method
@@ -59,6 +57,10 @@ def parse_request(socket_data):
 			if query_parameters:
 				query_parameters = unquote_plus(query_parameters)
 				request["query_parameters"] = dict([p.split("=") for p in query_parameters.split("&")])
+		elif index == (len(lines)-1): #POST form data
+				form_parameters = unquote_plus(line)
+				if form_parameters:
+					request["form"] = dict([p.split("=") for p in form_parameters.split("&")])
 		else: #headers
 			name, _, value = line.partition(":")
 			request["headers"][name.lower()] = value.lstrip()
@@ -72,9 +74,8 @@ with socket.socket() as server_sock:
 	print(f"Listening on {HOST}:{PORT}...")
 	while True: #SERVER LOOP
 		client_sock, client_addr = server_sock.accept()
-		if DEBUG:
-			print(f"Accepted connection from {client_addr}")
-		data = client_sock.recv(1024)
+		print(f"Accepted connection from {client_addr}")
+		data = client_sock.recv(2048)
 		if not data:
 			print("Empty request")
 			client_sock.sendall(BAD_REQUEST_RESPONSE)
@@ -108,6 +109,10 @@ with socket.socket() as server_sock:
 							client_sock.sendall(response_headers)
 							client_sock.sendall(templated_search_html.encode('ASCII'))
 						else:
+							if request['method'] == 'POST': #add user to database
+								name = request["form"]["name"] if "name" in request["form"] else ""
+								favorite_food = request["form"]["favorite_food"] if "favorite_food" in request["form"] else ""
+								FAVORITE_FOOD_DATABASE[name] = favorite_food
 							response_headers = HTTP_HEADERS.format(
 								response_code=200,
 								response_type="OK",
