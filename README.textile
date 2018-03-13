@@ -77,3 +77,12 @@ Can we make a cryptocurrency?
 do the checksum work by hand
 
 
+
+make a form to GET information from the server, then another to POST new information to the server
+A POST request can't be made from the address bar, while a GET can.
+
+GET - safe and idempotent
+A safe operation is an operation which does not change the data requested.
+An idempotent operation is one in which the result will be the same no matter how many times you request it.
+POST - neither safe nor idempotent, used to create resources. submitting twice creates two new resources
+PUT - not safe but idempotent; can be run many times, but always replaces the same resource (at a given URI)

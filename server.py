@@ -7,9 +7,9 @@ PORT = 9000
 SERVER_ROOT = os.path.abspath("www")
 
 FAVORITE_FOOD_DATABASE = {
-		"Jim Bob" : "ice cream",
-		"Slim Bob" : "hamburgers",
-		"Mary Smith" : "sushi"
+		"Jim" : "ice cream",
+		"Bob" : "hamburgers",
+		"Mary" : "sushi"
 }
 
 HTTP_HEADERS = """\
@@ -49,7 +49,7 @@ with socket.socket() as server_sock:
 	server_sock.bind((HOST,PORT))
 	server_sock.listen(1)
 	print(f"Listening on {HOST}:{PORT}...")
-	while True:
+	while True: #SERVER LOOP
 		client_sock, client_addr = server_sock.accept()
 		print(f"Accepted connection from {client_addr}")
 		data = client_sock.recv(1024)
@@ -58,28 +58,29 @@ with socket.socket() as server_sock:
 			client_sock.sendall(BAD_REQUEST_RESPONSE)
 		else:
 			try:
+				#PARSE REQUEST
 				lines = data.decode('ASCII').split("\r\n")
 				request = {"headers": {}}
 				for index, line in enumerate(lines):
 					if not line:
 						break
-					elif index == 0: #request method
+					elif index == 0: #request method, path, query_parameters
 						method, path, _ = line.split(" ")
 						request["method"] = method
 						path, _, query_parameters = path.partition("?")
 						request["path"] = path						
-
+						request["query_parameters"] = {}
 						if query_parameters:
 							query_parameters = unquote_plus(query_parameters)
 							request["query_parameters"] = dict([p.split("=") for p in query_parameters.split("&")])
-						else:
-							request["query_parameters"] = {}
-					else:
+					else: #headers
 						name, _, value = line.partition(":")
 						request["headers"][name.lower()] = value.lstrip()
-
 				print(request)
-				if request['method'] != "GET":
+				#END PARSE REQUEST
+
+				#HANDLE REQUEST
+				if request['method'] not in ["GET","POST"]:
 					client_sock.sendall(METHOD_NOT_ALLOWED_RESPONSE.encode('ASCII'))
 				else:
 					path = request['path']
@@ -91,15 +92,9 @@ with socket.socket() as server_sock:
 						file = open(filename, 'rb')
 						if path == "/search.html":
 							search_html = file.read()
-							first_name = request["query_parameters"]["first_name"] if "first_name" in request["query_parameters"] else ""
-							last_name = request["query_parameters"]["last_name"] if "last_name" in request["query_parameters"] else ""
-							lookup_key = " ".join([first_name, last_name])
-							favorite_food = FAVORITE_FOOD_DATABASE[lookup_key] if lookup_key in FAVORITE_FOOD_DATABASE else "unknown"
-							templated_search_html = search_html.decode('utf-8').format(
-								first_name=first_name,
-								last_name=last_name,
-								favorite_food=favorite_food
-								)
+							name = request["query_parameters"]["name"] if "name" in request["query_parameters"] else ""
+							favorite_food = FAVORITE_FOOD_DATABASE[name] if name in FAVORITE_FOOD_DATABASE else "unknown"
+							templated_search_html = search_html.decode('utf-8').format(name=name,favorite_food=favorite_food)
 							response_headers = HTTP_HEADERS.format(
 								response_code=200,
 								response_type="OK",
@@ -120,6 +115,7 @@ with socket.socket() as server_sock:
 					else:
 						client_sock.sendall(NOT_FOUND_RESPONSE.encode('ASCII'))
 					client_sock.close()
+				#END HANDLE REQUEST
 			except Exception as e:
 				print(f'Failed to parse request: {e}')
 				client_sock.sendall(BAD_REQUEST_RESPONSE.encode('ASCII'))
