@@ -83,14 +83,31 @@ with socket.socket() as server_sock:
 
 					if os.path.isfile(filename):
 						file = open(filename, 'rb')
-						response_headers = HTTP_HEADERS.format(
-							response_code=200,
-							response_type="OK",
-							content_type="text/html",
-							content_length=os.path.getsize(filename)
-							).encode('ASCII')
-						client_sock.sendall(response_headers)
-						client_sock.sendfile(file)
+						if path == "/search.html":
+							search_html = file.read()
+							first_name = request["query_parameters"]["first_name"] if "first_name" in request["query_parameters"] else ""
+							last_name = request["query_parameters"]["last_name"] if "last_name" in request["query_parameters"] else ""
+							templated_search_html = search_html.decode('utf-8').format(
+								first_name=first_name,
+								last_name=last_name
+								)
+							response_headers = HTTP_HEADERS.format(
+								response_code=200,
+								response_type="OK",
+								content_type="text/html",
+								content_length=len(templated_search_html)
+								).encode('ASCII')
+							client_sock.sendall(response_headers)
+							client_sock.sendall(templated_search_html.encode('ASCII'))
+						else:
+							response_headers = HTTP_HEADERS.format(
+								response_code=200,
+								response_type="OK",
+								content_type="text/html",
+								content_length=os.path.getsize(filename)
+								).encode('ASCII')
+							client_sock.sendall(response_headers)
+							client_sock.sendfile(file)
 					else:
 						client_sock.sendall(NOT_FOUND_RESPONSE.encode('ASCII'))
 					client_sock.close()
